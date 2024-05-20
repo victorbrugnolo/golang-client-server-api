@@ -47,8 +47,8 @@ type ResponseDTO struct {
 }
 
 func main() {
-	http.HandleFunc("/dolar-price", GetDolarPriceHandler)
-	http.ListenAndServe(":3000", nil)
+	http.HandleFunc("/cotacao", GetDolarPriceHandler)
+	http.ListenAndServe(":8080", nil)
 }
 
 func GetDolarPriceHandler(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +76,12 @@ func GetDolarPriceHandler(w http.ResponseWriter, r *http.Request) {
 	err = SaveDolarPriceOnDatabase(dolarPrice, db, r.Context())
 
 	if err != nil {
-		// w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = SaveDolarPriceOnFile(dolarPrice)
+
+	if err != nil {
 		return
 	}
 
@@ -149,9 +154,29 @@ func SaveDolarPriceOnDatabase(dolarPrice *DolarPrice, db *gorm.DB, ctx context.C
 
 	if err != nil {
 		log.Println("Saving dolar price on db failed, error: ", err.Error())
-
-		return err
 	}
 
-	return nil
+	log.Println("Dolar price saved on database")
+
+	return err
+}
+
+func SaveDolarPriceOnFile(dolarPrice *DolarPrice) error {
+	f, err := os.Create("cotacao.txt")
+
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = f.Write([]byte("Dólar: " + dolarPrice.USDBRL.Bid + "\n"))
+
+	if err != nil {
+		log.Println("Error writing to file: ", err.Error())
+	}
+
+	f.Close()
+
+	log.Println("Dolar price saved on file")
+
+	return err
 }

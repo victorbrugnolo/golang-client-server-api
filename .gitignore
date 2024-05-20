@@ -90,5 +90,6 @@ fabric.properties
 !.idea/runConfigurations
 
 dolar-price.db
+cotacao.txt
 
 # End of https://www.toptal.com/developers/gitignore/api/goland+all
